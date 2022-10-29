@@ -151,6 +151,20 @@ import { axiosInstance } from "./libs/http";
 import { Country } from "./interfaces/Country";
 
 const loading = ref(false);
+const page = ref(1);
+
+// Initial load
+const initalLoad = () => {
+  displayCountries.value = countries.value?.slice(0, pageSize.value);
+  page.value = 1;
+
+  if (countries.value) {
+    pageCount.value = Math.max(
+      1,
+      Math.ceil(countries.value.length / currentPageSize.value)
+    );
+  }
+};
 
 const {
   data: countries,
@@ -191,8 +205,14 @@ enum OrderBy {
 const orderNameBy = ref();
 
 const reset = () => {
+  loading.value = true;
   orderNameBy.value = "";
   execute();
+  initalLoad();
+
+  setTimeout(() => {
+    loading.value = false;
+  }, 1000);
 };
 
 const orderCountryNameBy = (order: OrderBy) => {
@@ -233,7 +253,7 @@ const fetchData = ({
 const { currentPage, currentPageSize, isFirstPage, prev, next } =
   useOffsetPagination({
     total: countries.value?.length,
-    page: 1,
+    page,
     pageSize,
     onPageChange: fetchData,
   });
@@ -245,15 +265,7 @@ const { currentPage, currentPageSize, isFirstPage, prev, next } =
  * support async/await to get the actual pageCount
  */
 watchEffect(() => {
-  // initial load
-  displayCountries.value = countries.value?.slice(0, pageSize.value);
-
-  if (countries.value) {
-    pageCount.value = Math.max(
-      1,
-      Math.ceil(countries.value.length / currentPageSize.value)
-    );
-  }
+  initalLoad();
 });
 
 const isLastPage = computed(() => currentPage.value === pageCount.value);
