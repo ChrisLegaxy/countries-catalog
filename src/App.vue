@@ -290,7 +290,7 @@ const {
   isLoading,
   execute,
   error,
-} = useAxios<Country[]>("/all", axiosInstance);
+} = useAxios<Country[] | any>("/all", axiosInstance);
 
 /**
  * * Search
