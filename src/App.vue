@@ -7,32 +7,37 @@
             Countries Catalog
           </div>
           <div class="relative mt-8">
-            <div
-              class="flex absolute inset-y-0 left-0 items-center pl-3 pointer-events-none"
-            >
-              <svg
-                aria-hidden="true"
-                class="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
+            <div>
+              <div
+                class="flex absolute inset-y-0 left-0 items-center pl-3 pointer-events-none"
               >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                ></path>
-              </svg>
+                <svg
+                  aria-hidden="true"
+                  class="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  ></path>
+                </svg>
+              </div>
+              <input
+                id="default-search"
+                v-model="searchCriteria"
+                type="search"
+                class="block p-4 pl-10 w-full rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                placeholder="Country Name"
+              />
             </div>
-            <input
-              v-model="searchCriteria"
-              type="search"
-              id="default-search"
-              class="block p-4 pl-10 w-full rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              placeholder="Country Name"
-            />
+          </div>
+          <div class="text-red-400 mt-2.5 absolute">
+            {{ error?.response?.data.message }}
           </div>
         </div>
       </header>
@@ -78,7 +83,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch, nextTick } from "vue";
+import { ref, watch } from "vue";
 import { useAxios } from "@vueuse/integrations/useAxios";
 import { HalfCircleSpinner } from "epic-spinners";
 
@@ -91,6 +96,7 @@ const {
   data: countries,
   isLoading,
   execute,
+  error,
 } = useAxios<Country[]>("/all", axiosInstance);
 
 const searchCriteria = ref("");
@@ -103,7 +109,10 @@ watch(searchCriteria, async () => {
       execute(`/name/${searchCriteria.value}`);
     }, 1000);
   } else {
-    execute();
+    clearTimeout(searchTimeout);
+    searchTimeout = await setTimeout(() => {
+      execute();
+    }, 1000);
   }
 });
 </script>
