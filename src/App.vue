@@ -122,7 +122,7 @@
       </div>
 
       <!-- Mobile Pagination -->
-      <div class="flex gap-x-2 justify-end mb-12 md:hidden">
+      <div class="flex gap-x-2 justify-end mb-12 md:hidden px-4">
         <button
           :disabled="isFirstPage"
           :class="{
