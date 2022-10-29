@@ -42,35 +42,70 @@
           </div>
           <!-- Sorting -->
           <div class="mt-12">Sort by name</div>
-          <button
-            @click="orderCountryNameBy(OrderBy.ASC)"
-            :class="{ 'bg-sky-700 text-white': orderNameBy === OrderBy.ASC }"
-            class="px-5 py-2.5 mt-4 font-medium rounded-sm text-sm border-2 border-sky-700 hover:bg-sky-800 hover:text-white focus:ring-2 focus:ring-blue-300"
-          >
-            Ascending
-          </button>
-          <button
-            @click="orderCountryNameBy(OrderBy.DESC)"
-            :class="{ 'bg-sky-700 text-white': orderNameBy === OrderBy.DESC }"
-            class="ml-2.5 px-5 py-2.5 mt-4 font-medium rounded-sm text-sm border-2 border-sky-700 hover:bg-sky-800 hover:text-white focus:ring-2 focus:ring-blue-300"
-          >
-            Descending
-          </button>
-          <button
-            @click="reset"
-            class="ml-2.5 px-5 py-2.5 mt-4 text-white font-medium rounded-sm text-sm bg-sky-700 hover:bg-sky-800 focus:ring-2 focus:ring-blue-300"
-          >
-            Reset
-          </button>
+          <div class="flex">
+            <div>
+              <button
+                :class="{
+                  'bg-sky-700 text-white': orderNameBy === OrderBy.ASC,
+                }"
+                class="px-5 py-2.5 mt-4 font-medium rounded-sm text-sm border-2 border-sky-700 hover:bg-sky-800 hover:text-white focus:ring-2 focus:ring-blue-300"
+                @click="orderCountryNameBy(OrderBy.ASC)"
+              >
+                Ascending
+              </button>
+              <button
+                :class="{
+                  'bg-sky-700 text-white': orderNameBy === OrderBy.DESC,
+                }"
+                class="ml-2.5 px-5 py-2.5 mt-4 font-medium rounded-sm text-sm border-2 border-sky-700 hover:bg-sky-800 hover:text-white focus:ring-2 focus:ring-blue-300"
+                @click="orderCountryNameBy(OrderBy.DESC)"
+              >
+                Descending
+              </button>
+              <button
+                class="ml-2.5 px-5 py-2.5 mt-4 text-white font-medium rounded-sm text-sm bg-sky-700 hover:bg-sky-800 focus:ring-2 focus:ring-blue-300"
+                @click="reset"
+              >
+                Reset
+              </button>
+            </div>
+
+            <div class="ml-auto">
+              <button
+                :disabled="isFirstPage"
+                :class="{
+                  'bg-sky-700 text-white': orderNameBy === OrderBy.ASC,
+                  'cursor-not-allowed bg-gray-500 hover:bg-gray-500':
+                    isFirstPage,
+                }"
+                class="px-5 py-2.5 mt-4 text-white font-medium rounded-sm text-sm border-2 bg-sky-700 hover:bg-sky-800 focus:ring-2 focus:ring-blue-300"
+                @click="prev"
+              >
+                Previous
+              </button>
+              <button
+                :disabled="isLastPage"
+                :class="{
+                  'bg-sky-700 text-white': orderNameBy === OrderBy.DESC,
+                  'cursor-not-allowed bg-gray-500 hover:bg-gray-500':
+                    isLastPage,
+                }"
+                class="ml-2.5 px-5 py-2.5 mt-4 text-white font-medium rounded-sm text-sm border-2 bg-sky-700 hover:bg-sky-800 focus:ring-2 focus:ring-blue-300"
+                @click="next"
+              >
+                Next
+              </button>
+            </div>
+          </div>
         </div>
       </header>
 
       <div
-        class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 xl:gap-6 mt-4"
+        class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 xl:gap-6 mt-4 mb-12"
       >
         <!-- Country Card -->
         <div
-          v-for="(country, index) in countries"
+          v-for="(country, index) in displayCountries"
           :key="index"
           class="rounded-xl"
         >
@@ -106,8 +141,9 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch } from "vue";
+import { ref, watch, watchEffect, computed } from "vue";
 import { useAxios } from "@vueuse/integrations/useAxios";
+import { useOffsetPagination } from "@vueuse/core";
 import { HalfCircleSpinner } from "epic-spinners";
 import _ from "lodash";
 
@@ -174,4 +210,51 @@ const orderCountryNameBy = (order: OrderBy) => {
     loading.value = false;
   }, 1000);
 };
+
+/**
+ * * Pagination
+ */
+const displayCountries = ref();
+const pageSize = ref(25);
+const pageCount = ref();
+
+const fetchData = ({
+  currentPage,
+  currentPageSize,
+}: {
+  currentPage: number;
+  currentPageSize: number;
+}) => {
+  const start = (currentPage - 1) * currentPageSize;
+  const end = start + currentPageSize;
+  displayCountries.value = countries.value?.slice(start, end);
+};
+
+const { currentPage, currentPageSize, isFirstPage, prev, next } =
+  useOffsetPagination({
+    total: countries.value?.length,
+    page: 1,
+    pageSize,
+    onPageChange: fetchData,
+  });
+
+/**
+ * * Custom Last Page Logic
+ *
+ * Due to problem with useOffsetPagination package has bugs that doesn't
+ * support async/await to get the actual pageCount
+ */
+watchEffect(() => {
+  // initial load
+  displayCountries.value = countries.value?.slice(0, pageSize.value);
+
+  if (countries.value) {
+    pageCount.value = Math.max(
+      1,
+      Math.ceil(countries.value.length / currentPageSize.value)
+    );
+  }
+});
+
+const isLastPage = computed(() => currentPage.value === pageCount.value);
 </script>
