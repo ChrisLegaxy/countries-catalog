@@ -32,7 +32,7 @@
                 id="default-search"
                 v-model="searchCriteria"
                 type="search"
-                class="block p-4 pl-10 w-full rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                class="block p-4 pl-10 w-full rounded-sm border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                 placeholder="Country Name"
               />
               <div class="text-red-400 mt-2.5 absolute">
@@ -46,28 +46,23 @@
             <div class="flex gap-x-2 flex-wrap">
               <button
                 :class="{
-                  'bg-sky-700 text-white': orderNameBy === OrderBy.ASC,
+                  '!bg-sky-700 !text-white': orderNameBy === OrderBy.ASC,
                 }"
-                class="px-5 py-2.5 mt-4 font-medium rounded-sm text-sm border-2 border-sky-700 hover:bg-sky-800 hover:text-white focus:ring-2 focus:ring-blue-300"
+                class="button !text-black !bg-transparent border-2 !border-sky-700 hover:!bg-sky-700 hover:!text-white"
                 @click="orderCountryNameBy(OrderBy.ASC)"
               >
                 Ascending
               </button>
               <button
                 :class="{
-                  'bg-sky-700 text-white': orderNameBy === OrderBy.DESC,
+                  '!bg-sky-700 !text-white': orderNameBy === OrderBy.DESC,
                 }"
-                class="px-5 py-2.5 mt-4 font-medium rounded-sm text-sm border-2 border-sky-700 hover:bg-sky-800 hover:text-white focus:ring-2 focus:ring-blue-300"
+                class="button !text-black !bg-transparent border-2 !border-sky-700 hover:!bg-sky-700 hover:!text-white"
                 @click="orderCountryNameBy(OrderBy.DESC)"
               >
                 Descending
               </button>
-              <button
-                class="px-5 py-2.5 mt-4 text-white font-medium rounded-sm text-sm bg-sky-700 hover:bg-sky-800 focus:ring-2 focus:ring-blue-300"
-                @click="reset"
-              >
-                Reset
-              </button>
+              <button class="button" @click="reset">Reset</button>
             </div>
 
             <div class="hidden ml-auto md:flex gap-x-2">
@@ -75,10 +70,10 @@
                 :disabled="isFirstPage"
                 :class="{
                   'bg-sky-700 text-white': orderNameBy === OrderBy.ASC,
-                  'cursor-not-allowed bg-gray-500 hover:bg-gray-500':
+                  '!cursor-not-allowed !bg-gray-500 hover:!bg-gray-500':
                     isFirstPage,
                 }"
-                class="px-5 py-2.5 mt-4 text-white font-medium rounded-sm text-sm border-2 bg-sky-700 hover:bg-sky-800 focus:ring-2 focus:ring-blue-300"
+                class="button"
                 @click="prev"
               >
                 Previous
@@ -87,10 +82,10 @@
                 :disabled="isLastPage"
                 :class="{
                   'bg-sky-700 text-white': orderNameBy === OrderBy.DESC,
-                  'cursor-not-allowed bg-gray-500 hover:bg-gray-500':
+                  '!cursor-not-allowed !bg-gray-500 hover:!bg-gray-500':
                     isLastPage,
                 }"
-                class="px-5 py-2.5 mt-4 text-white font-medium rounded-sm text-sm border-2 bg-sky-700 hover:bg-sky-800 focus:ring-2 focus:ring-blue-300"
+                class="button"
                 @click="next"
               >
                 Next
@@ -100,6 +95,7 @@
         </div>
       </header>
 
+      <!-- Country Catalog Wrapper -->
       <div
         class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 xl:gap-6 my-4 md:mb-12"
       >
@@ -118,25 +114,22 @@
             </div>
             <div>{{ country.cca2 }}</div>
             <div>{{ country.cca3 }}</div>
-            <button
-              class="py-2.5 mt-4 text-white font-medium rounded-sm text-sm w-full bg-sky-700 hover:bg-sky-800 focus:ring-2 focus:ring-blue-300"
-              @click="viewCountryDetails(country)"
-            >
+            <button class="button w-full" @click="viewCountryDetails(country)">
               View Details
             </button>
           </div>
         </div>
       </div>
 
-      <!-- Country Dialog -->
+      <!-- Mobile Pagination -->
       <div class="flex gap-x-2 justify-end mb-12 md:hidden">
         <button
           :disabled="isFirstPage"
           :class="{
             'bg-sky-700 text-white': orderNameBy === OrderBy.ASC,
-            'cursor-not-allowed bg-gray-500 hover:bg-gray-500': isFirstPage,
+            '!cursor-not-allowed !bg-gray-500 hover:!bg-gray-500': isFirstPage,
           }"
-          class="px-5 py-2.5 mt-4 text-white font-medium rounded-sm text-sm border-2 bg-sky-700 hover:bg-sky-800 focus:ring-2 focus:ring-blue-300"
+          class="button"
           @click="prev"
         >
           Previous
@@ -145,15 +138,16 @@
           :disabled="isLastPage"
           :class="{
             'bg-sky-700 text-white': orderNameBy === OrderBy.DESC,
-            'cursor-not-allowed bg-gray-500 hover:bg-gray-500': isLastPage,
+            '!cursor-not-allowed !bg-gray-500 hover:!bg-gray-500': isLastPage,
           }"
-          class="px-5 py-2.5 mt-4 text-white font-medium rounded-sm text-sm border-2 bg-sky-700 hover:bg-sky-800 focus:ring-2 focus:ring-blue-300"
+          class="button"
           @click="next"
         >
           Next
         </button>
       </div>
 
+      <!-- Country Dialog -->
       <TransitionRoot appear :show="isDialogOpen" as="template">
         <Dialog as="div" class="relative z-10" @close="closeModal">
           <TransitionChild
@@ -230,7 +224,7 @@
                   <div class="mt-4">
                     <button
                       type="button"
-                      class="py-2.5 mt-4 text-white font-medium rounded-sm text-sm w-full bg-sky-700 hover:bg-sky-800 focus:ring-2 focus:ring-blue-300"
+                      class="button w-full"
                       @click="closeModal"
                     >
                       Got it, thanks!
@@ -244,6 +238,7 @@
       </TransitionRoot>
     </div>
 
+    <!-- Loading Spinner -->
     <div
       v-if="isLoading || loading"
       class="fixed inset-0 w-full h-full grid place-items-center bg-sky-100/60"
@@ -410,3 +405,9 @@ const closeModal = () => {
   isDialogOpen.value = false;
 };
 </script>
+
+<style lang="scss" scoped>
+.button {
+  @apply px-5 py-2.5 mt-4 text-white font-medium rounded-sm text-sm bg-sky-700 hover:bg-sky-800 focus:ring-2 focus:ring-blue-300;
+}
+</style>
