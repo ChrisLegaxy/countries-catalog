@@ -6,6 +6,7 @@
           <div class="text-4xl font-bold mt-10 inline-block">
             Countries Catalog
           </div>
+          <!-- Search -->
           <div class="relative mt-8">
             <div>
               <div
@@ -34,16 +35,38 @@
                 class="block p-4 pl-10 w-full rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500"
                 placeholder="Country Name"
               />
+              <div class="text-red-400 mt-2.5 absolute">
+                {{ error?.response?.data.message }}
+              </div>
             </div>
           </div>
-          <div class="text-red-400 mt-2.5 absolute">
-            {{ error?.response?.data.message }}
-          </div>
+          <!-- Sorting -->
+          <div class="mt-12">Sort by name</div>
+          <button
+            @click="orderCountryNameBy(OrderBy.ASC)"
+            :class="{ 'bg-sky-700 text-white': orderNameBy === OrderBy.ASC }"
+            class="px-5 py-2.5 mt-4 font-medium rounded-sm text-sm border-2 border-sky-700 hover:bg-sky-800 hover:text-white focus:ring-2 focus:ring-blue-300"
+          >
+            Ascending
+          </button>
+          <button
+            @click="orderCountryNameBy(OrderBy.DESC)"
+            :class="{ 'bg-sky-700 text-white': orderNameBy === OrderBy.DESC }"
+            class="ml-2.5 px-5 py-2.5 mt-4 font-medium rounded-sm text-sm border-2 border-sky-700 hover:bg-sky-800 hover:text-white focus:ring-2 focus:ring-blue-300"
+          >
+            Descending
+          </button>
+          <button
+            @click="reset"
+            class="ml-2.5 px-5 py-2.5 mt-4 text-white font-medium rounded-sm text-sm bg-sky-700 hover:bg-sky-800 focus:ring-2 focus:ring-blue-300"
+          >
+            Reset
+          </button>
         </div>
       </header>
 
       <div
-        class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 xl:gap-6 mt-8"
+        class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 xl:gap-6 mt-4"
       >
         <!-- Country Card -->
         <div
@@ -70,7 +93,7 @@
       </div>
     </div>
     <div
-      v-if="isLoading"
+      v-if="isLoading || loading"
       class="fixed inset-0 w-full h-full grid place-items-center bg-sky-100/60"
     >
       <half-circle-spinner
@@ -86,11 +109,12 @@
 import { ref, watch } from "vue";
 import { useAxios } from "@vueuse/integrations/useAxios";
 import { HalfCircleSpinner } from "epic-spinners";
+import _ from "lodash";
 
 import { axiosInstance } from "./libs/http";
 import { Country } from "./interfaces/Country";
 
-let searchTimeout: any;
+const loading = ref(false);
 
 const {
   data: countries,
@@ -99,6 +123,10 @@ const {
   error,
 } = useAxios<Country[]>("/all", axiosInstance);
 
+/**
+ * * Search
+ */
+let searchTimeout: any;
 const searchCriteria = ref("");
 
 watch(searchCriteria, async () => {
@@ -115,4 +143,35 @@ watch(searchCriteria, async () => {
     }, 1000);
   }
 });
+
+/**
+ * * Order By
+ */
+enum OrderBy {
+  ASC = "ASC",
+  DESC = "DESC",
+}
+
+const orderNameBy = ref();
+
+const reset = () => {
+  orderNameBy.value = "";
+  execute();
+};
+
+const orderCountryNameBy = (order: OrderBy) => {
+  orderNameBy.value = order;
+  loading.value = true;
+
+  if (order === OrderBy.ASC) {
+    countries.value = _.orderBy(countries.value, ["name.official"], "asc");
+  } else if (order === OrderBy.DESC) {
+    countries.value = _.orderBy(countries.value, ["name.official"], "desc");
+  }
+
+  // just additional UX
+  setTimeout(() => {
+    loading.value = false;
+  }, 1000);
+};
 </script>
