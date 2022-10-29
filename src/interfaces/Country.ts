@@ -95,6 +95,7 @@ export interface Name {
 
 export interface NativeName {
   eng: Translation;
+  zho: Translation;
 }
 
 export interface Translation {
