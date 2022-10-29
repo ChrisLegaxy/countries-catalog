@@ -1,10 +1,38 @@
 <template>
-  <main class="bg-sky-100">
+  <main>
     <div class="container mx-auto sm:px-12">
       <header>
         <div class="px-4">
           <div class="text-4xl font-bold mt-10 inline-block">
             Countries Catalog
+          </div>
+          <div class="relative mt-8">
+            <div
+              class="flex absolute inset-y-0 left-0 items-center pl-3 pointer-events-none"
+            >
+              <svg
+                aria-hidden="true"
+                class="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                ></path>
+              </svg>
+            </div>
+            <input
+              v-model="searchCriteria"
+              type="search"
+              id="default-search"
+              class="block p-4 pl-10 w-full rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              placeholder="Country Name"
+            />
           </div>
         </div>
       </header>
@@ -36,14 +64,46 @@
         </div>
       </div>
     </div>
+    <div
+      v-if="isLoading"
+      class="fixed inset-0 w-full h-full grid place-items-center bg-sky-100/60"
+    >
+      <half-circle-spinner
+        :animation-duration="1000"
+        :size="60"
+        color="#0ea5e9"
+      />
+    </div>
   </main>
 </template>
 
 <script lang="ts" setup>
+import { ref, watch, nextTick } from "vue";
 import { useAxios } from "@vueuse/integrations/useAxios";
+import { HalfCircleSpinner } from "epic-spinners";
 
 import { axiosInstance } from "./libs/http";
 import { Country } from "./interfaces/Country";
 
-const { data: countries } = useAxios<Country[]>("/all", axiosInstance);
+let searchTimeout: any;
+
+const {
+  data: countries,
+  isLoading,
+  execute,
+} = useAxios<Country[]>("/all", axiosInstance);
+
+const searchCriteria = ref("");
+
+watch(searchCriteria, async () => {
+  if (searchCriteria.value) {
+    // avoid excessive calls
+    clearTimeout(searchTimeout);
+    searchTimeout = await setTimeout(() => {
+      execute(`/name/${searchCriteria.value}`);
+    }, 1000);
+  } else {
+    execute();
+  }
+});
 </script>
