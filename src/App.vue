@@ -46,18 +46,18 @@
             <div class="flex gap-x-2 flex-wrap">
               <button
                 :class="{
-                  '!bg-sky-700 !text-white': orderNameBy === OrderBy.ASC,
+                  'bg-sky-700 text-white': orderNameBy === OrderBy.ASC,
                 }"
-                class="button !text-black !bg-transparent border-2 !border-sky-700 hover:!bg-sky-700 hover:!text-white"
+                class="button-alt border-2 border-sky-700 hover:text-white"
                 @click="orderCountryNameBy(OrderBy.ASC)"
               >
                 Ascending
               </button>
               <button
                 :class="{
-                  '!bg-sky-700 !text-white': orderNameBy === OrderBy.DESC,
+                  'bg-sky-700 text-white': orderNameBy === OrderBy.DESC,
                 }"
-                class="button !text-black !bg-transparent border-2 !border-sky-700 hover:!bg-sky-700 hover:!text-white"
+                class="button-alt border-2 border-sky-700 hover:text-white"
                 @click="orderCountryNameBy(OrderBy.DESC)"
               >
                 Descending
@@ -409,5 +409,9 @@ const closeModal = () => {
 <style lang="scss" scoped>
 .button {
   @apply px-5 py-2.5 mt-4 text-white font-medium rounded-sm text-sm bg-sky-700 hover:bg-sky-800 focus:ring-2 focus:ring-blue-300;
+}
+
+.button-alt {
+  @apply px-5 py-2.5 mt-4 font-medium rounded-sm text-sm hover:bg-sky-800 focus:ring-2 focus:ring-blue-300;
 }
 </style>
