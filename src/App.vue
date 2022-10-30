@@ -40,6 +40,7 @@
               </div>
             </div>
           </div>
+
           <!-- Sorting -->
           <div class="mt-12">Sort by name</div>
           <div class="flex">
@@ -65,6 +66,7 @@
               <button class="button" @click="reset">Reset</button>
             </div>
 
+            <!-- Pagination -->
             <div class="hidden ml-auto md:flex gap-x-2">
               <button
                 :disabled="isFirstPage"
@@ -273,21 +275,10 @@ import { axiosInstance } from "./libs/http";
 import { Country } from "./interfaces/Country";
 
 const loading = ref(false);
-const page = ref(1);
 
-// Initial load
-const initalLoad = () => {
-  displayCountries.value = countries.value?.slice(0, pageSize.value);
-  page.value = 1;
-
-  if (countries.value) {
-    pageCount.value = Math.max(
-      1,
-      Math.ceil(countries.value.length / currentPageSize.value)
-    );
-  }
-};
-
+/**
+ * * Load data from API via Axios
+ */
 const {
   data: countries,
   isLoading,
@@ -298,61 +289,26 @@ const {
 /**
  * * Search
  */
-let searchTimeout: any;
+let searchTimeout: any; // for clearing search timeout functions to avoid excessive calls
 const searchCriteria = ref("");
 
-watch(searchCriteria, async () => {
+watch(searchCriteria, () => {
+  // avoid excessive calls
+  clearTimeout(searchTimeout);
+
   if (searchCriteria.value) {
-    // avoid excessive calls
-    clearTimeout(searchTimeout);
-    searchTimeout = await setTimeout(() => {
+    searchTimeout = setTimeout(() => {
       execute(`/name/${searchCriteria.value}`);
     }, 1000);
   } else {
     clearTimeout(searchTimeout);
-    searchTimeout = await setTimeout(() => {
+    searchTimeout = setTimeout(() => {
       execute();
     }, 1000);
   }
-});
 
-/**
- * * Order By
- */
-enum OrderBy {
-  ASC = "ASC",
-  DESC = "DESC",
-}
-
-const orderNameBy = ref();
-
-const reset = () => {
-  loading.value = true;
   orderNameBy.value = "";
-  searchCriteria.value = "";
-  execute();
-  initalLoad();
-
-  setTimeout(() => {
-    loading.value = false;
-  }, 1000);
-};
-
-const orderCountryNameBy = (order: OrderBy) => {
-  orderNameBy.value = order;
-  loading.value = true;
-
-  if (order === OrderBy.ASC) {
-    countries.value = _.orderBy(countries.value, ["name.official"], "asc");
-  } else if (order === OrderBy.DESC) {
-    countries.value = _.orderBy(countries.value, ["name.official"], "desc");
-  }
-
-  // just additional UX
-  setTimeout(() => {
-    loading.value = false;
-  }, 1000);
-};
+});
 
 /**
  * * Pagination
@@ -360,6 +316,7 @@ const orderCountryNameBy = (order: OrderBy) => {
 const displayCountries = ref();
 const pageSize = ref(25);
 const pageCount = ref();
+const page = ref(1);
 
 const fetchData = ({
   currentPage,
@@ -387,11 +344,25 @@ const { currentPage, currentPageSize, isFirstPage, prev, next } =
  * Due to problem with useOffsetPagination package has bugs that doesn't
  * support async/await to get the actual pageCount
  */
+const initalLoad = () => {
+  // inital load
+  displayCountries.value = countries.value?.slice(0, pageSize.value);
+  page.value = 1;
+
+  // custom last page logic for getting page count
+  if (countries.value) {
+    pageCount.value = Math.max(
+      1,
+      Math.ceil(countries.value.length / currentPageSize.value)
+    );
+  }
+};
+
+const isLastPage = computed(() => currentPage.value === pageCount.value);
+
 watchEffect(() => {
   initalLoad();
 });
-
-const isLastPage = computed(() => currentPage.value === pageCount.value);
 
 /**
  * * Country Dialog
@@ -406,6 +377,43 @@ const viewCountryDetails = (country: Country) => {
 
 const closeModal = () => {
   isDialogOpen.value = false;
+};
+
+/**
+ * * Order By
+ */
+enum OrderBy {
+  ASC = "ASC",
+  DESC = "DESC",
+}
+const orderNameBy = ref();
+
+const orderCountryNameBy = (order: OrderBy) => {
+  orderNameBy.value = order;
+  loading.value = true;
+
+  if (order === OrderBy.ASC) {
+    countries.value = _.orderBy(countries.value, ["name.official"], "asc");
+  } else if (order === OrderBy.DESC) {
+    countries.value = _.orderBy(countries.value, ["name.official"], "desc");
+  }
+
+  // just additional UX
+  setTimeout(() => {
+    loading.value = false;
+  }, 1000);
+};
+
+const reset = () => {
+  loading.value = true;
+  orderNameBy.value = "";
+  searchCriteria.value = "";
+  execute();
+  initalLoad();
+
+  setTimeout(() => {
+    loading.value = false;
+  }, 1000);
 };
 </script>
 
