@@ -105,7 +105,10 @@
           :key="index"
           class="rounded-xl"
         >
-          <div class="aspect-[1.5] p-4">
+          <div
+            class="aspect-[1.5] p-4 cursor-pointer"
+            @click="viewCountryDetails(country)"
+          >
             <img :src="country.flags.png" class="w-full h-full" />
           </div>
           <div class="p-4">
