@@ -285,7 +285,7 @@ const {
   execute,
   error,
 } = useAxios<Country[] | any>("/all", axiosInstance);
-
+const savedCountries = ref<Country[]>([]);
 /**
  * * Search
  */
@@ -297,14 +297,20 @@ watch(searchCriteria, () => {
   clearTimeout(searchTimeout);
 
   if (searchCriteria.value) {
-    searchTimeout = setTimeout(() => {
-      execute(`/name/${searchCriteria.value}`);
-    }, 1000);
+    // searchTimeout = setTimeout(() => {
+    //   execute(`/name/${searchCriteria.value}`);
+    // }, 1000);
+    countries.value = savedCountries.value?.filter((country) =>
+      country.name.official
+        .toLowerCase()
+        .includes(searchCriteria.value.toLowerCase())
+    );
   } else {
-    clearTimeout(searchTimeout);
-    searchTimeout = setTimeout(() => {
-      execute();
-    }, 1000);
+    // clearTimeout(searchTimeout);
+    // searchTimeout = setTimeout(() => {
+    //   execute();
+    // }, 1000);
+    countries.value = savedCountries.value;
   }
 
   orderNameBy.value = "";
@@ -355,6 +361,11 @@ const initalLoad = () => {
       1,
       Math.ceil(countries.value.length / currentPageSize.value)
     );
+  }
+
+  // save all data
+  if (countries.value && savedCountries.value.length <= 0) {
+    savedCountries.value = countries.value;
   }
 };
 
